@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 //prints the command with arguments, also will determine validity of command in process
 void printCommandWithArgs(int argc, char* argv[]);
 
@@ -9,7 +10,7 @@ void printCommandWithArgs(int argc, char* argv[]);
 int* isValidCommand(int argc, char* argv[]);
 
 //take a string and prints the string in groups of 5 uppercase letters
-void printEncyptedText(char encryptedText[], FILE * output);
+//void printEncyptedText(char encryptedText[], FILE * output);
 
 //gets a single line from file
 char *fgetline(FILE *fp);
@@ -20,7 +21,7 @@ char *loadKey(char* key);
 //takes a single char and returns the encrypted text or decrypted text based off of a flag
 char encrypt(char plaintext,char cipherChar, int flag);
 
-int numChars, numLines, numLetters, numUpper, numLower, numDigit, numWhite, numElse;
+int numChars, numLines, numLetters, numUpper, numLower, numDigit, numWhite, numElse = 0;
 
 
 int main(int argc, char *argv[])
@@ -64,9 +65,18 @@ int main(int argc, char *argv[])
 
 	while(inputLines != NULL){ //while fgetline returns a valid pointer
 		for(counter = 0; inputLines[counter] != '\0'; counter++){ // while inputline doesn't return a null terminator
-			if(inputLines[counter] >= 'a' || inputLines[counter] <= 'z' || inputLines[counter] >= 'A' || inputLines[counter] <= 'Z'){ //only valid letters are encrypted 
-				if(argv[3] != NULL && argv[3][0] == 'd'){// if the arg 3 is passed and is decrypt mode
+			numChars++; //for stats
+			if((inputLines[counter] >= 97 && inputLines[counter] <= 121) || (inputLines[counter] >= 65 && inputLines[counter] <= 90)){ //only valid letters are encrypted 
+				if(argv[3] != NULL && argv[3][0] == 100){// if the arg 3 is passed and is decrypt mode 'd'
+					
+					numLetters++; //for stats
+					printf("%c", encrypt(inputLines[counter], cipher[cipherindex], 1));
 					fprintf(outputFile, "%c", encrypt(inputLines[counter], cipher[cipherindex], 1));// write to file
+					group5++;
+					if(group5 == 5){
+						fprintf(outputFile, "___");
+						group5 = 0;
+					}
 					//incrment the cipher or shift it back to start
 					if(cipherindex == cipherSize){
 						cipherindex = 0;
@@ -77,9 +87,10 @@ int main(int argc, char *argv[])
 				}
 				//if in encrypt mode
 				else {
+					//printf("%c", encrypt(inputLines[counter], cipher[cipherindex], 0));
 					fprintf(outputFile, "%c", encrypt(inputLines[counter], cipher[cipherindex], 0));
 					//increment the cipher or shift it back to start
-					if(cipherindex == cipherSize){
+					if(cipherindex == cipherSize - 1){
 						cipherindex = 0;
 					}
 					else {
@@ -89,12 +100,22 @@ int main(int argc, char *argv[])
 			}
 			//for when a non letter char is passed
 			else{
+				if(inputLines[counter] == 10)
+					numLines++;
+				else if(inputLines[counter] == 32)
+					numWhite++;
+				else if (inputLines[counter] >=48 && inputLines[counter] <= 57)
+					numDigit++;
+				else
+					numElse++;
+				printf("have been passed a non letter %d", inputLines[counter]);
 				fprintf(outputFile, "%c", inputLines[counter]);
 			}
 		}
 	inputLines = fgetline(inputFile);//get the next line or recive a null on fail
 	}
 
+	printf("The total number of lines was %d", numLines);
 
  	system("PAUSE");
 	return 0;
@@ -179,45 +200,6 @@ int* isValidCommand(int argc, char* argv[]){
 
 
 
-//when given a string of encrypted text, this function will put it in groups of 5 uppercase letters. Does no encyrption, simply prints
-void printEncyptedText(char encryptedText[], FILE *output) {
-	int i, j, index, groupsOfFive;
-	char holder;
-	//for if the string is not an even number of 5 ie 13
-	if(strlen(encryptedText)%5 != 0){
-		//prints all chars up to the last group of 5
-		
-		groupsOfFive = strlen(encryptedText)/5;
-
-		for(i = 0; i < strlen(encryptedText)/5 ; i++){
-			
-			for(j = 0; j < 5; j++){
-				index = 5*i + j; 
-				fprintf(output, "%c", encryptedText[index]);
-					
-			}
-			fprintf(output, "   ");
-		}
-		for( i = 0; i < strlen(encryptedText)%5; i++){
-			fprintf(output, "%c", encryptedText[5*groupsOfFive+i]);
-		}
-	}
-	//for if the string is an even number of 5 ie 15
-	else {
-		for(i = 0; i < strlen(encryptedText)/5; i++){
-			for(j = 0; j < 5; j++){
-				index = 5*i + j;
-				fprintf(output, "%c", encryptedText[index]);
-			}
-			fprintf(output, "   ");
-		}
-	}
-
-
-	printf("\n");
-	return;
-}
-
 
 
 char *fgetline(FILE *fp)
@@ -271,7 +253,7 @@ char *fgetline(FILE *fp)
 
 char * loadKey(char* key){
 	char * cipher;
-	int i, numChars, offset;
+	int i, number, offset;
 	offset = 0 ;// ofset is incase the key provided has non letters in it, iteration can still procede normally and have no garbage values in cipher
 	if(NULL == key){
 		cipher = (char*) malloc(22);
@@ -279,48 +261,63 @@ char * loadKey(char* key){
 		return cipher;
 	}
 	else{
-		numChars = 0;
+
+		number = 0;
 		//cuz strlen cant be used...
-		for(i = 0; key[i] != '\0' || key[i] != '\n'; i++){
-			numChars++;
+		for(i = 0; key[i] != 0 && key[i] != 10; i++){ // '\0' '\n'
+			number++;
 		}
+
 		//will be more than enough, since numChars +1 will only be upperbound on size of cipher
 		cipher = (char*) malloc(numChars + 1);
 
 		for(i = 0; i < numChars; i++){
-			if(key[i] >= 'a' || key[i] <= 'z'){
+			if(key[i] >= 97 && key[i] <= 121){ // 'a' || 'z"
 				cipher[i-offset] = key[i] - 32;
 			}
-			else if(key[i] >= 'A' || key[i] <= 'Z'){
+			else if(key[i] >= 65 && key[i] <= 90){ // 'A' || 'Z'
 				cipher[i-offset] = key[i];
 			}
 			else{
 				offset++;
 			}
 		}
-		cipher[i-offset + 1] = '\0';
+		cipher[i-offset + 1] = 0;//'\0'
 		return cipher;
 	}
 }
+
+
 
 char encrypt(char plaintext, char cipherChar, int flag){
 	int plainNum, cipherNum, shiftamount ;
 	cipherNum = cipherChar - 65;
 	shiftamount = 0;
+
+
+	//char * returnChar;
+	//returnChar = (char)malloc(1);
+
 	//if text is a lowercase char
-	if(plaintext >= 'a' || plaintext <= 'z'){
+	if(plaintext >= 97 && plaintext <= 121){ // 'a' || 'z'
+		
 		plainNum = plaintext - 97;
 	}
 	//if text is uppercase
 	else{
 		plainNum = plaintext - 65;
 	}
-	if(plaintext >= 'A' || plaintext <= 'Z' || plaintext >= 'a' || plaintext <= 'z'){
+	if((plaintext >= 65 && plaintext <= 90) || (plaintext >= 97 && plaintext <= 121)){ // >= 'A' || <= 'Z' || >= 'a' || <= 'z'
 		//for capitals
-		if(plaintext >= 'A' || plaintext <= 'Z'){
+		if(plaintext >= 65 && plaintext <= 90){ // 'A' || 'Z'
+			numUpper++; //for stats
 			//encrypt
 			if(flag == 0){
 				shiftamount = (cipherNum + plainNum) % 26;
+
+				//*returnChar = shiftamount + 65;
+				//return returnChar;
+
 				return shiftamount + 65;
 			}
 			//decrypt
@@ -329,14 +326,19 @@ char encrypt(char plaintext, char cipherChar, int flag){
 				if(shiftamount < 0){
 					shiftamount = shiftamount + 26;
 				}
+				//*returnChar = shiftamount + 65;
+				//return returnChar;
 				return shiftamount + 65;
 			}
 		}
 		//for lowercase
 		else {
+			numLower++; //stats
 			//encrypt
 			if(flag == 0){
 				shiftamount = (cipherNum + plainNum) % 26;
+				//*returnChar = shiftamount + 97;
+				//return returnChar;
 				return shiftamount + 97;
 			}
 			//decrypt
@@ -345,12 +347,62 @@ char encrypt(char plaintext, char cipherChar, int flag){
 				if(shiftamount < 0){
 					shiftamount = shiftamount + 26;
 				}
+				//*returnChar = shiftamount + 97;
+				//return returnChar;
 				return shiftamount + 97;
 			}
 		}
 	}
 	//should only occur if for some reason the call before hand passed a non letter char
 	else {
+		//*returnChar = plaintext;
+		//return returnChar;
 		return plaintext;
 	}
 }
+
+
+
+
+/*
+//when given a string of encrypted text, this function will put it in groups of 5 uppercase letters. Does no encyrption, simply prints
+void printEncyptedText(char encryptedText[], FILE *output) {
+	int i, j, index, groupsOfFive;
+	char holder;
+	//for if the string is not an even number of 5 ie 13
+	if(strlen(encryptedText)%5 != 0){
+		//prints all chars up to the last group of 5
+		
+		groupsOfFive = strlen(encryptedText)/5;
+
+		for(i = 0; i < strlen(encryptedText)/5 ; i++){
+			
+			for(j = 0; j < 5; j++){
+				index = 5*i + j; 
+				fprintf(output, "%c", encryptedText[index]);
+					
+			}
+			fprintf(output, "   ");
+		}
+		for( i = 0; i < strlen(encryptedText)%5; i++){
+			fprintf(output, "%c", encryptedText[5*groupsOfFive+i]);
+		}
+	}
+	//for if the string is an even number of 5 ie 15
+	else {
+		for(i = 0; i < strlen(encryptedText)/5; i++){
+			for(j = 0; j < 5; j++){
+				index = 5*i + j;
+				fprintf(output, "%c", encryptedText[index]);
+			}
+			fprintf(output, "   ");
+		}
+	}
+
+
+	printf("\n");
+	return;
+}
+
+*/
+
