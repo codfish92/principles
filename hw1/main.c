@@ -15,19 +15,19 @@ void printEncyptedText(char encryptedText[], FILE * output);
 char *fgetline(FILE *fp);
 
 //takes the key supplied and 'sanitizes it' by removing all non letters and making all letters uppercase
-char * loadKey(char* key);
+char *loadKey(char* key);
 
 //takes a single char and returns the encrypted text or decrypted text based off of a flag
-char encrypt(char plaintext,char cipherChar, int flag)
+char encrypt(char plaintext,char cipherChar, int flag);
 
-int numChars, numLines, numLetters, numUpper, numLower, numDigit, numWhite, numElse
+int numChars, numLines, numLetters, numUpper, numLower, numDigit, numWhite, numElse;
 
 
 int main(int argc, char *argv[])
 {
 	FILE *inputFile, *outputFile; //input and output files
 	int cipherSize;
-	char *inputLines, cipher;
+	char *inputLines, *cipher;
 	printCommandWithArgs(argc, argv); // prints command
 	inputFile = fopen(argv[1], "rt"); //open file
 	
@@ -50,23 +50,49 @@ int main(int argc, char *argv[])
 			outputFile = stdout;
 		}
 	}
-	
-	cipher = loadkey(argv[3])//load argument and make it the cipher
-	inputLines = fgetline(inputFile)//holds the input
-	int plaintextIndex, cipherindex, group5;// for encryption
-	group5 = 0 //for when outputing groups of 5
+	cipher = loadKey(argv[3]);//load argument and make it the cipher
+	inputLines = fgetline(inputFile);//holds the input
+	int counter, cipherindex, group5;// for encryption
+	group5 = 0; //for when outputing groups of 5
+	cipherindex = 0;
+
+
+	for(counter = 0; cipher[counter] != '\0'; counter++){
+	}
+	cipherSize = counter;
+
+
 	while(inputLines != NULL){ //while fgetline returns a valid pointer
 		for(counter = 0; inputLines[counter] != '\0'; counter++){ // while inputline doesn't return a null terminator
 			if(inputLines[counter] >= 'a' || inputLines[counter] <= 'z' || inputLines[counter] >= 'A' || inputLines[counter] <= 'Z'){ //only valid letters are encrypted 
-				if(argv[3] != NULL && argv[3][0] == 'd'){// if the arg 3 is passed and is d
-					fprintf(// write to file
+				if(argv[3] != NULL && argv[3][0] == 'd'){// if the arg 3 is passed and is decrypt mode
+					fprintf(outputFile, "%c", encrypt(inputLines[counter], cipher[cipherindex], 1));// write to file
+					//incrment the cipher or shift it back to start
+					if(cipherindex == cipherSize){
+						cipherindex = 0;
+					}
+					else{
+						cipherindex++;
+					}
 				}
+				//if in encrypt mode
 				else {
-
+					fprintf(outputFile, "%c", encrypt(inputLines[counter], cipher[cipherindex], 0));
+					//increment the cipher or shift it back to start
+					if(cipherindex == cipherSize){
+						cipherindex = 0;
+					}
+					else {
+						cipherindex++;
+					}
 				}
 			}
+			//for when a non letter char is passed
+			else{
+				fprintf(outputFile, "%c", inputLines[counter]);
+			}
 		}
-
+	inputLines = fgetline(inputFile);//get the next line or recive a null on fail
 	}
 
 
@@ -245,7 +271,7 @@ char *fgetline(FILE *fp)
 
 char * loadKey(char* key){
 	char * cipher;
-	int i, numChars, offset, letters;
+	int i, numChars, offset;
 	offset = 0 ;// ofset is incase the key provided has non letters in it, iteration can still procede normally and have no garbage values in cipher
 	if(NULL == key){
 		cipher = (char*) malloc(22);
@@ -255,7 +281,7 @@ char * loadKey(char* key){
 	else{
 		numChars = 0;
 		//cuz strlen cant be used...
-		for(i = 0; key[i] != '\0'; i++){
+		for(i = 0; key[i] != '\0' || key[i] != '\n'; i++){
 			numChars++;
 		}
 		//will be more than enough, since numChars +1 will only be upperbound on size of cipher
@@ -273,57 +299,58 @@ char * loadKey(char* key){
 			}
 		}
 		cipher[i-offset + 1] = '\0';
-		return cipher
+		return cipher;
 	}
 }
 
 char encrypt(char plaintext, char cipherChar, int flag){
-	int plainNum, cipherNum, shiftamount 
-	cipherNum = cipherChar - 65
+	int plainNum, cipherNum, shiftamount ;
+	cipherNum = cipherChar - 65;
+	shiftamount = 0;
 	//if text is a lowercase char
 	if(plaintext >= 'a' || plaintext <= 'z'){
-		plainNum = plaintext - 97
+		plainNum = plaintext - 97;
 	}
 	//if text is uppercase
 	else{
-		plainNum = plaintext - 65
+		plainNum = plaintext - 65;
 	}
 	if(plaintext >= 'A' || plaintext <= 'Z' || plaintext >= 'a' || plaintext <= 'z'){
 		//for capitals
 		if(plaintext >= 'A' || plaintext <= 'Z'){
 			//encrypt
 			if(flag == 0){
-				shiftamount = (cipherNum + plainNum) % 26
-				return shiftamount + 65
+				shiftamount = (cipherNum + plainNum) % 26;
+				return shiftamount + 65;
 			}
 			//decrypt
 			else {
-				shiftamount = plainNum - cipherNum
+				shiftamount = plainNum - cipherNum;
 				if(shiftamount < 0){
-					shiftamount = shiftamount + 26
+					shiftamount = shiftamount + 26;
 				}
-				return shiftamount + 65
+				return shiftamount + 65;
 			}
 		}
 		//for lowercase
 		else {
 			//encrypt
 			if(flag == 0){
-				shiftamount = (cipherNum + plainNum) % 26
-				return shiftamount + 97
+				shiftamount = (cipherNum + plainNum) % 26;
+				return shiftamount + 97;
 			}
 			//decrypt
 			else {
-				shiftamount = plainNum - cipherNum
+				shiftamount = plainNum - cipherNum;
 				if(shiftamount < 0){
-					shiftamount = shiftamount + 26
+					shiftamount = shiftamount + 26;
 				}
-				return shiftamount + 97
+				return shiftamount + 97;
 			}
 		}
 	}
 	//should only occur if for some reason the call before hand passed a non letter char
 	else {
-		return plaintext
+		return plaintext;
 	}
 }
