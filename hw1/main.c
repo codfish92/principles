@@ -61,22 +61,24 @@ int main(int argc, char *argv[])
 	for(counter = 0; cipher[counter] != '\0'; counter++){
 	}
 	cipherSize = counter;
-
+/*
+	group5++;
+					if(group5 == 5){
+						fprintf(outputFile, "___");
+						group5 = 0;
+					}
+*/
 
 	while(inputLines != NULL){ //while fgetline returns a valid pointer
 		for(counter = 0; inputLines[counter] != '\0'; counter++){ // while inputline doesn't return a null terminator
 			numChars++; //for stats
 			if((inputLines[counter] >= 97 && inputLines[counter] <= 121) || (inputLines[counter] >= 65 && inputLines[counter] <= 90)){ //only valid letters are encrypted 
-				if(argv[3] != NULL && argv[3][0] == 100){// if the arg 3 is passed and is decrypt mode 'd'
+				if(argv[3] != NULL && argv[4][0] == 100){// if the arg 3 is passed and is decrypt mode 'd'
 					
 					numLetters++; //for stats
-					printf("%c", encrypt(inputLines[counter], cipher[cipherindex], 1));
+					//printf("%c", encrypt(inputLines[counter], cipher[cipherindex], 1));
 					fprintf(outputFile, "%c", encrypt(inputLines[counter], cipher[cipherindex], 1));// write to file
-					group5++;
-					if(group5 == 5){
-						fprintf(outputFile, "___");
-						group5 = 0;
-					}
+				
 					//incrment the cipher or shift it back to start
 					if(cipherindex == cipherSize){
 						cipherindex = 0;
@@ -87,6 +89,7 @@ int main(int argc, char *argv[])
 				}
 				//if in encrypt mode
 				else {
+					numLetters++; //for stats
 					//printf("%c", encrypt(inputLines[counter], cipher[cipherindex], 0));
 					fprintf(outputFile, "%c", encrypt(inputLines[counter], cipher[cipherindex], 0));
 					//increment the cipher or shift it back to start
@@ -100,22 +103,34 @@ int main(int argc, char *argv[])
 			}
 			//for when a non letter char is passed
 			else{
-				if(inputLines[counter] == 10)
-					numLines++;
-				else if(inputLines[counter] == 32)
+				if(inputLines[counter] == 32)
 					numWhite++;
 				else if (inputLines[counter] >=48 && inputLines[counter] <= 57)
 					numDigit++;
 				else
 					numElse++;
-				printf("have been passed a non letter %d", inputLines[counter]);
+				//printf("have been passed a non letter %d", inputLines[counter]);
 				fprintf(outputFile, "%c", inputLines[counter]);
 			}
 		}
 	inputLines = fgetline(inputFile);//get the next line or recive a null on fail
+	fprintf(outputFile, "\n");
+	numLines++;
 	}
 
-	printf("The total number of lines was %d", numLines);
+	fclose(inputFile);
+	fclose(outputFile);
+	free(cipher);
+	printf("\n\n");
+	printf("The total number of lines was %d\n", numLines);
+	printf("Total number of chars is %d\n", numChars);
+	printf("Total number of letters is %d\n", numLetters);
+	printf("Total number of lower is %d\n", numLower);
+	printf("Total number of upper is %d\n", numUpper);
+	printf("Total number of spaces is %d\n", numWhite);
+	printf("Total number of digits is %d\n", numDigit);
+	printf("Total number of others is %d\n", numElse);
+
 
  	system("PAUSE");
 	return 0;
@@ -166,6 +181,7 @@ void printCommandWithArgs(int argc, char* argv[]) {
 	printf("The input file is ");
 	printf(argv[1]);
 	printf("\n");
+	free(isValid);
 }
 
 
@@ -255,6 +271,7 @@ char * loadKey(char* key){
 	char * cipher;
 	int i, number, offset;
 	offset = 0 ;// ofset is incase the key provided has non letters in it, iteration can still procede normally and have no garbage values in cipher
+
 	if(NULL == key){
 		cipher = (char*) malloc(22);
 		cipher = "COLORADOSCHOOLOFMINES";
@@ -264,14 +281,13 @@ char * loadKey(char* key){
 
 		number = 0;
 		//cuz strlen cant be used...
-		for(i = 0; key[i] != 0 && key[i] != 10; i++){ // '\0' '\n'
+		for(i = 0; key[i] != 0 && key[i] != 10 && key[i] != 32; i++){ // '\0' '\n' space
 			number++;
+
 		}
-
-		//will be more than enough, since numChars +1 will only be upperbound on size of cipher
-		cipher = (char*) malloc(numChars + 1);
-
-		for(i = 0; i < numChars; i++){
+		//will be more than enough, since number +1 will be upperbound on size of cipher
+		cipher = (char*) malloc(number + 1);
+		for(i = 0; i < number; i++){
 			if(key[i] >= 97 && key[i] <= 121){ // 'a' || 'z"
 				cipher[i-offset] = key[i] - 32;
 			}
@@ -293,8 +309,6 @@ char encrypt(char plaintext, char cipherChar, int flag){
 	int plainNum, cipherNum, shiftamount ;
 	cipherNum = cipherChar - 65;
 	shiftamount = 0;
-
-
 	//char * returnChar;
 	//returnChar = (char)malloc(1);
 
@@ -308,8 +322,10 @@ char encrypt(char plaintext, char cipherChar, int flag){
 		plainNum = plaintext - 65;
 	}
 	if((plaintext >= 65 && plaintext <= 90) || (plaintext >= 97 && plaintext <= 121)){ // >= 'A' || <= 'Z' || >= 'a' || <= 'z'
+		
 		//for capitals
 		if(plaintext >= 65 && plaintext <= 90){ // 'A' || 'Z'
+			
 			numUpper++; //for stats
 			//encrypt
 			if(flag == 0){
@@ -343,12 +359,15 @@ char encrypt(char plaintext, char cipherChar, int flag){
 			}
 			//decrypt
 			else {
+
 				shiftamount = plainNum - cipherNum;
+				
 				if(shiftamount < 0){
 					shiftamount = shiftamount + 26;
 				}
 				//*returnChar = shiftamount + 97;
 				//return returnChar;
+			
 				return shiftamount + 97;
 			}
 		}
