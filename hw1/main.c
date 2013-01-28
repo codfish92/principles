@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 {
 	FILE *inputFile, *outputFile; //input and output files
 	int cipherSize;
-	char *inputLines, *cipher;
+	char *inputLines, *cipher, *key;
 	printCommandWithArgs(argc, argv); // prints command
 	inputFile = fopen(argv[1], "rt"); //open file
 	
@@ -41,6 +41,10 @@ int main(int argc, char *argv[])
 	//no output file given
 	if(argc < 3){
 		outputFile = stdout;
+		
+	}
+	if(argc < 4){
+		key = NULL;
 	}
 	else{
 		outputFile = fopen(argv[2], "wt");
@@ -51,8 +55,9 @@ int main(int argc, char *argv[])
 			outputFile = stdout;
 		}
 	}
-	
-	cipher = loadKey(argv[3]);//load argument and make it the cipher
+
+	cipher = loadKey(key);//load argument and make it the cipher
+
 	inputLines = fgetline(inputFile);//holds the input
 	int counter, cipherindex, group5;// for encryption
 	group5 = 0; //for when outputing groups of 5
@@ -73,6 +78,7 @@ int main(int argc, char *argv[])
 	while(inputLines != NULL){ //while fgetline returns a valid pointer
 
 		for(counter = 0; inputLines[counter] != '\0'; counter++){ // while inputline doesn't return a null terminator
+		
 			
 			numChars++; //for stats
 			if((inputLines[counter] >= 97 && inputLines[counter] <= 122) || (inputLines[counter] >= 65 && inputLines[counter] <= 90)){ //only valid letters are encrypted 
@@ -276,12 +282,12 @@ char * loadKey(char* key){
 	offset = 0 ;// ofset is incase the key provided has non letters in it, iteration can still procede normally and have no garbage values in cipher
 	
 	if(NULL == key){
+
 		cipher = (char*) malloc(22);
 		cipher = "COLORADOSCHOOLOFMINES";
 		return cipher;
 	}
 	else{
-			printf("%s\n\n", key);
 		number = 0;
 		//cuz strlen cant be used...
 		for(i = 0; key[i] != 0 && key[i] != 10 && key[i] != 32; i++){ // '\0' '\n' space
