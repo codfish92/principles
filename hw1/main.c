@@ -7,7 +7,7 @@
 void printCommandWithArgs(int argc, char* argv[]);
 
 //determine valdity of command
-int* isValidCommand(int argc, char* argv[]);
+int isValidCommand(int argc, char* argv[]);
 
 //take a string and prints the string in groups of 5 uppercase letters
 //void printEncyptedText(char encryptedText[], FILE * output);
@@ -126,6 +126,7 @@ int main(int argc, char *argv[])
 	fclose(inputFile);
 	fclose(outputFile);
 	free(cipher);
+	free(inputLines);
 	printf("\n\n");
 	printf("The total number of lines was %d\n", numLines);
 	printf("Total number of chars is %d\n", numChars);
@@ -148,8 +149,7 @@ int main(int argc, char *argv[])
 
 // this is the command that will output the apporiate text to screen, also checks if command is valid
 void printCommandWithArgs(int argc, char* argv[]) {
-  int* isValid;
-  isValid = (int*) malloc(4);
+  int isValid;
   isValid = isValidCommand(argc, argv);
   if(0 == isValid){
 		system("PAUSE"); // no output needed on this func, since isValidCommand will output before returning
@@ -186,7 +186,6 @@ void printCommandWithArgs(int argc, char* argv[]) {
 	printf("The input file is ");
 	printf(argv[1]);
 	printf("\n");
-	free(isValid);
 }
 
 
@@ -194,28 +193,27 @@ void printCommandWithArgs(int argc, char* argv[]) {
 
 
 // checks to see if the command given is valid, since a command is only 'invalid' if there are too few arguments or the mode is incorrect, only need to check the mode and the argument count
-int* isValidCommand(int argc, char* argv[]){
-	int* isValid;
-	isValid = (int*)malloc(4);
+int isValidCommand(int argc, char* argv[]){
+	int isValid;
 	if(argc < 2 || argc >= 6){
 		printf("No input file given\n");
 		printf("Usage of command is: command inputFile, outputFile, cipherKey, mode\n");
 		printf("If there is outputFile given, output will be sent to standard out\n");
 		printf("If there is no cipherKey, the cipher key will use a default\n");
 		printf("If there is no mode, then encyrption is the default mode. valid modes are encrypt and decrypt\n");
-		*isValid = 0;
+		isValid = 0;
 		return isValid;        
   	 }
 	 else if(argc == 5){
 		if(strcmp(argv[4], "encrypt") == 1 && strcmp(argv[4], "decrypt") == 1){ //strcmp compares two strings, and will return a 0 if they are equal. 
 			printf("Invalid mode. Use either 'encrypt' or 'decrypt'.\n");
 			printf(argv[4]);
-			*isValid = 0;
+			isValid = 0;
 			return isValid;
 
 		}
 	  }
-		*isValid = 1;
+		isValid = 1;
 		return isValid;
 }
 
