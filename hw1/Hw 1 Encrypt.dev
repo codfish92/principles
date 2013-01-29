@@ -30,7 +30,7 @@ CompilerSet=0
 CompilerSettings=
 
 [Unit1]
-FileName=main.c
+FileName=CS400_akoellin_HW01
 CompileCpp=0
 Folder=
 Compile=1
