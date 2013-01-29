@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+
 
 
 //prints the command with arguments, also will determine validity of command in process
@@ -20,6 +20,9 @@ char *loadKey(char* key);
 
 //takes a single char and returns the encrypted text or decrypted text based off of a flag
 char encrypt(char plaintext,char cipherChar, int flag);
+
+//will compare two strings and return 1 if they are equal and 0 if they are not
+int compareString(char * x, char * y);
 
 int numChars, numLines, numLetters, numUpper, numLower, numDigit, numWhite, numElse = 0;
 
@@ -55,7 +58,7 @@ int main(int argc, char *argv[])
 			outputFile = stdout;
 		}
 	}
-
+	key = argv[3];
 	cipher = loadKey(key);//load argument and make it the cipher
 
 	inputLines = fgetline(inputFile);//holds the input
@@ -211,7 +214,7 @@ int isValidCommand(int argc, char* argv[]){
 		return isValid;        
   	 }
 	 else if(argc == 5){
-		if(strcmp(argv[4], "encrypt") == 1 && strcmp(argv[4], "decrypt") == 1){ //strcmp compares two strings, and will return a 0 if they are equal. 
+		if(compareString(argv[4], "encrypt") == 0 && compareString(argv[4], "decrypt") == 0){ 
 			printf("Invalid mode. Use either 'encrypt' or 'decrypt'.\n");
 			printf(argv[4]);
 			isValid = 0;
@@ -223,7 +226,23 @@ int isValidCommand(int argc, char* argv[]){
 		return isValid;
 }
 
+int compareString(char * x, char * y){
+	int i, returnValue;
+	for(i=0; x[i] != '\0' && y[i] != '\0'; i++){
+		if(x[i] == y[i])
+			returnValue = 1;
+		else{
+			returnValue = 0;
+			break;
+		}
+	
+	}
+	if (returnValue==1 && x[i] == '\0' && y[i] == '\0')
+		return 1;
+	else
+		return 0; 
 
+}
 
 
 
@@ -280,7 +299,6 @@ char * loadKey(char* key){
 	char * cipher;
 	int i, number, offset;
 	offset = 0 ;// ofset is incase the key provided has non letters in it, iteration can still procede normally and have no garbage values in cipher
-	
 	if(NULL == key){
 
 		cipher = (char*) malloc(22);
@@ -307,10 +325,8 @@ char * loadKey(char* key){
 			else{
 				offset++;
 			}
-			printf("%s\n", cipher);
 		}
 		cipher[i-offset] = 0;//'\0'
-		printf("%s\n",cipher);
 		return cipher;
 	}
 }
