@@ -21,7 +21,7 @@ OverrideOutput=0
 OverrideOutputName=
 HostApplication=
 Folders=
-CommandLine=encyrted.txt decyrted.txt YOLOswag decrypt
+CommandLine=encrypt.txt decrypt.txt swag decrypt
 UseCustomMakefile=0
 CustomMakefile=
 IncludeVersionInfo=0
@@ -30,7 +30,7 @@ CompilerSet=0
 CompilerSettings=
 
 [Unit1]
-FileName=CS400_akoellin_HW01
+FileName=CS400_akoellin_HW01.c
 CompileCpp=0
 Folder=
 Compile=1
