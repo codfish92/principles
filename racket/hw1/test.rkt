@@ -1,7 +1,7 @@
 (require racket/trace) ; used for (trace funcName)
 (define aSampleList (list 'a 'b 'c 'd)); a test list
 (define anotherSampleList (list 'b 'c (list 'a 'b 'c))) ; a more complicated test list using a list inside of a list
-
+;part 1
 ;containsAnywhere works by car'ing the list to see if the first element is the element you want, otherwise it will call containsAnywhere recursivly with the cdr of the list. you cant car an empty list so an empty list check is done first
 ; if you have to check an empty list, clearly the element was never in there.
 (define (containsAnywhere element aList) ; given an element and a valid list
@@ -13,6 +13,9 @@
               #t ; return true
               (containsAnywhere element (cdr aList)))))); other wise send the list (minus the first element) to the function contains anywhere
 
+
+
+;part 2
 ;the function that handels the recursion of removeAll
 (define (removeAllStep element aList returnList)
   (if (empty? aList) ;if the list is empty
@@ -38,7 +41,39 @@
   ); end if containsAnywhere
  )
 
-(trace removeAllStep)
+
+;part 3
+;converts x feet to meters
+(define (feet-to-meters x)
+  (/ x 3.2808) ; m = f/3.2808
+  );end define
+
+;converts x meters to feet
+(define (meters-to-feet x)
+  (* x 3.2808) ; f = m * 3.2808
+  );end define
+
+;converts x fahrenheit to celcius
+(define (fahrenheit-to-celcius x)
+  (* (/ 5 9) (- x 32)) ; c = (f-32) * 5/9
+  );end define
+
+;converts x celcius to fahrenheit
+(define (celcius-to-fahrenheit x)
+  (+ (* x (/ 9 5)) 32) ; f = c * 9/5 +32
+  );end define
 
 
-(removeAll 'a anotherSampleList)
+
+(define (conversionCalculator)
+  (display "Enter the unit you want to convert: ")
+  (define unit1 (read)); read in the first input
+  (display "\nEnter the unit you want to convert to: ")
+  (define unit2 (read)); read int the second input
+  (display "\nEnter the number of unit 1 you have: ")
+  (define num (read))
+  (display (string? unit1))
+  (display (string-append unit1 (string-append "-" unit2)))
+  ) ;end define
+
+(conversionCalculator)
