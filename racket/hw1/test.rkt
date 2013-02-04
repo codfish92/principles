@@ -13,14 +13,15 @@
 
 ;the function that handels the recursion of removeAll
 (define (removeAllStep element aList returnList)
-  (display element)
   (if (empty? aList) ;if the list is empty
-      (display returnList) ; return the returnList
+      (returnList); return the returnList
+      '()
       );end if empty list
   (define x (car aList)); else store the element in question in a var to prevent the element being lost from the car action. then 
       
   (if (not (equal? element x)) ; if the elementInQuestion is not the element we want to remove
-      (append returnList x); add it to the returnList
+      (append returnList (list 'x)) ; add it to the returnListi
+      '()
       ); end if not equal 
      (removeAllStep element (cdr aList) returnList)
  );end define
