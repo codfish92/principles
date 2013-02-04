@@ -7,24 +7,25 @@
 (define (containsAnywhere element aList) ; given an element and a valid list
   (if (empty? aList) ; if the list is empty
       #f;return false
-      (if (equal? element (car aList)) ; else if the first element of the list is the element were looking for
-          #t ; return true
-          (containsAnywhere element (cdr aList))))); other wise send the list (minus the first element) to the function contains anywhere
+      (if (list? (car aList))
+          (containsAnywhere element (car aList))
+          (if (equal? element (car aList)) ; else if the first element of the list is the element were looking for
+              #t ; return true
+              (containsAnywhere element (cdr aList)))))); other wise send the list (minus the first element) to the function contains anywhere
 
 ;the function that handels the recursion of removeAll
 (define (removeAllStep element aList returnList)
   (if (empty? aList) ;if the list is empty
-      (returnList); return the returnList
-      '()
-      );end if empty list
-  (define x (car aList)); else store the element in question in a var to prevent the element being lost from the car action. then 
-      
-  (if (not (equal? element x)) ; if the elementInQuestion is not the element we want to remove
-      (append returnList (list 'x)) ; add it to the returnListi
-      '()
-      ); end if not equal 
-     (removeAllStep element (cdr aList) returnList)
- );end define
+      returnList; return the returnList
+      (if (list? (car aList))
+          (removeAllStep element (cdr aList) (append returnList (list (removeAll element (car aList))))) ; if the first element in aList is a list in self, it will append the result of that list going through the removeall function to the returnlist as it goes through the remove all step again
+          (if (not (equal? element (car aList))) ; if the elementInQuestion is not the element we want to remove
+          (removeAllStep element (cdr aList) (append returnList (list (car aList)))) ; add it to the returnList
+          (removeAllStep element (cdr aList) returnList) ; just recurse without the append
+          ); end if not equal     
+       );end check for list
+  );end if empty list
+);end define
 
 
 ;removeAll will work by car'ing the list and seeing if it is the element you want to remove. if it is, it will simply call cdr on the rest of the list, otherwise it will append the element returned from car into another list. 
@@ -40,4 +41,4 @@
 (trace removeAllStep)
 
 
-(removeAll 'c aSampleList)
+(removeAll 'a anotherSampleList)
