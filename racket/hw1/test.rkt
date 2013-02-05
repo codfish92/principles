@@ -72,8 +72,10 @@
   (define unit2 (read)); read int the second input
   (display "\nEnter the number of unit 1 you have: ")
   (define num (read))
-  (display (string? unit1))
-  (display (string-append unit1 (string-append "-" unit2)))
+  (define funcName (string->symbol (string-append (symbol->string unit1) (string-append "-to-" (symbol->string unit2)))))
+  (display funcName)
+  (display (symbol? funcName))
+  ((eval funcName) num);run the function found
   ) ;end define
 
 (conversionCalculator)
