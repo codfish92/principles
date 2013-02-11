@@ -73,9 +73,7 @@
   (display "\nEnter the number of unit 1 you have: ")
   (define num (read))
   (define funcName (string->symbol (string-append (symbol->string unit1) (string-append "-to-" (symbol->string unit2)))))
-  (display funcName)
-  (display (symbol? funcName))
   ((eval funcName) num);run the function found
   ) ;end define
 
-(conversionCalculator)
+

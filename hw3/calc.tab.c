@@ -9,18 +9,18 @@
 FILE *yyin = NULL;
 char *yytext = NULL;
 
-int ExportToken(FILE *yyout, int token, char *yytext)
+int ExportToken(FILE *yyout, int token, char *yytext) // takes an output file, a token, and a string
 {
-    fprintf(yyout, "<%03i> %s\n", token, ((yytext)? yytext:""));
-    if (yytext)
-       free(yytext);
-    yytext = NULL;
+    fprintf(yyout, "<%03i> %s\n", token, ((yytext)? yytext:"")); // write the output, if no string exists, then use an empty string
+    if (yytext) //if the text exists
+       free(yytext); // deallocate it
+    yytext = NULL; // make it null
     return 0;
 }
 
-int yyparse(char const *filename)
+int yyparse(char const *filename) // takes a string representing the file name
 {
-   FILE *yyout;
+   FILE *yyout; //output file
    int token;
    
    yyin = fopen(filename, "rt");
