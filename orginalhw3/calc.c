@@ -14,8 +14,10 @@ typedef enum {
 
 int yylex(void)
 {
+	static int derp = 0;
 	static int tokens = 0;
 	static int buffer = 0; // make the buffer 
+	static int linenumber = 1;
 	int token;
 	int yychar;
 	char *holder;
@@ -35,15 +37,29 @@ int yylex(void)
   }
 	else
 		yychar = fgetc(yyin); // File assumed to be open and ready
-//remember to including identifiers
+	if(('0'<=yychar && '9' >= yychar) || '.' == yychar){
+	if(isdigit(yychar)){
+		state = INTEGER;
+		type = T_INTEGER;
+		//sprintf(holder, "%c", yychar);
+		//strcat(yystring, holder);//add to yystring
+
+	}
+	else{
+		state = FLOATSTART;
+		type = T_BAD;
+		//sprintf(holder, "%c", yychar);
+		//strcat(yystring, holder);
+	}
+	buffer = fgetc(yyin);
 	while(EOF != buffer && EOF != yychar){ // for handleing numbers such as floats and ints
-		yychar = buffer; //put the char in the buffer into the yychar
 		switch (state){
 			case START: // if in the start state
 				if('.' == yychar){ // if the next char is .
 					state = FLOATSTART; //move to the float start
 					sprintf(holder, "%c", yychar);
 					strcat(yystring, holder);//add to yystring
+					type = T_BAD;
 				}
 				else if(isdigit(yychar)){//is a digit
 					state = INTEGER;//state is integer
@@ -57,7 +73,7 @@ int yylex(void)
 			case INTEGER://have seen a num but no . or E
 				if('.' == yychar){// is a dot
 					state = FLOATNOE;// float but not an E float
-					type = T_FlOAT;// float token
+					type = T_FLOAT;// float token
 					sprintf(holder, "%c", yychar);
 					strcat(yystring, holder);//add to yystring
 				}
@@ -103,6 +119,7 @@ int yylex(void)
 					sprintf(holder, "%c", yychar);
 					strcat(yystring, holder);//add to yystring
 					state = EXPO;//now have a num with an E with a plus or minus, but still no accepting state
+					type = T_BAD;
 				}
 				else
 					goto bad;
@@ -127,18 +144,21 @@ int yylex(void)
 				break;
 		}
 		buffer = fgetc(yyin); //load the next char
+		yychar = buffer;
 	}
+	
 	bad: 
 	if(T_FLOAT == type){
 		token = FLT;
 		yytext = malloc((strlen(yystring)+1)*sizeof(char));
 		sprintf(yytext, yystring);
+		tokens++;
 	}
 	else if (T_INTEGER == type){
 		token = INT;
 		yytext = malloc((strlen(yystring)+1)*sizeof(char));
 		sprintf(yytext, yystring);
-		
+		tokens++;
 	}
 	else if (T_EOF == type){
 		
@@ -148,8 +168,8 @@ int yylex(void)
 		yytext = malloc((strlen(yystring)+1)*sizeof(char));
 		sprintf(yytext, yystring);
 	}
-
-	if (EOF == yychar)//if the end of file is encountered
+	}
+	else if (EOF == yychar)//if the end of file is encountered
 	{
 	   token = END;
 	   yytext = (char *) malloc(11*sizeof(char));
@@ -157,9 +177,14 @@ int yylex(void)
 	}
 	else if ('R' == yychar){//could be an id
 	   buffer = fgetc(yyin);
+	   printf("got into here");
 	   if(isdigit(buffer)){
 		sprintf(holder, "%c", yychar);
 		strcat(yystring, holder);//add to yystring
+		token = ID;
+		yytext = malloc(3);
+		sprintf(yytext, "%c%c", yychar, buffer);
+		tokens++;
 
 	   }
 	   else{
@@ -177,6 +202,12 @@ int yylex(void)
 	yytext = (char *) malloc(4*sizeof(char));
 	sprintf(yytext, "%c", yychar);
 	tokens++;
+	}
+	else if ('\n' == yychar){
+	token = NEWLINE;
+	yytext = (char *) malloc (8*sizeof(char));
+	sprintf(yytext, "%i", linenumber);
+	linenumber++;
 	}
 	else if('-' == yychar){ // a sub
 	token = SUB;
@@ -237,8 +268,8 @@ int yylex(void)
 			buffer = fgetc(yyin);//get the next char
 			while('\n' != buffer && EOF != buffer){ //while were not looking at EOF or a newline
 				numChars++;//add number of chars
-				yystring = (char *) realloc((numChars+1)*sizeof(char));// realloc space
-				sprintf(holder, "%c", yychar);
+				yystring = (char *) realloc(yystring, (numChars+1)*sizeof(char));// realloc space
+				sprintf(holder, "%c", buffer);
 				strcat(yystring, holder);//add to yystring
 				buffer = fgetc(yyin);//load next char
 			}
@@ -253,27 +284,27 @@ int yylex(void)
 			buffer = fgetc(yyin);//get next char
 			while(EOF != buffer){//while we are not at EOF
 				numChars++;
-				yystring = (char *) realloc((numChars+1)*sizeof(char));
-				sprintf(holder, "%c", yychar);
+				yystring = (char *) realloc(yystring, (numChars+1)*sizeof(char));
+				sprintf(holder, "%c", buffer);
 				strcat(yystring, holder);//add to yystring
 				if('*' == buffer){ //we could be at end
 					buffer = fgetc(yyin);//load next char
 					numChars++;
 					if(EOF == buffer)//if its the EOF, break
-						break
+						break;
 					else if('/' == buffer){ //we are at the end of block comment
-						yystring = (char*) realloc((numChars+1) * sizeof(char));
-						sprintf(holder, "%c", yychar);
+						yystring = (char*) realloc(yystring, (numChars+1) * sizeof(char));
+						sprintf(holder, "%c", buffer);
 						strcat(yystring, holder);//add to yystring
 						token = BLKCMT;
 						yytext = (char *) malloc((strlen(yystring)+1)*sizeof(char));
+						printf("yystring is /%s/\n");
 						sprintf(yytext, yystring);
 						break;
 					}
 					else{	//we are not at end of block comment, so just add buffer to token and continue
-						yystring = (char*) realloc((numChars+1) *sizeof(char));
-						strncat(yystring, &buffer, 1);
-				 		sprintf(holder, "%c", yychar);
+						yystring = (char*) realloc(yystring, (numChars+1) *sizeof(char));
+				 		sprintf(holder, "%c", buffer);
 						strcat(yystring, holder);//add to yystring
 					}
 				}
@@ -295,6 +326,8 @@ int yylex(void)
 	}
 	else
 	{
+		printf("%i whatever im bad\n", derp);
+		derp++;
 	   token = BAD;
 	   yytext = (char *) malloc(4*sizeof(char));
 	   if (isgraph(yychar)&&('#' != yychar))
@@ -303,7 +336,8 @@ int yylex(void)
 	      sprintf(yytext, "#%02X", (yychar&0xFF));
 	}
 	//----------------------------------------------------------
-	
+	free(yystring);
+	free(holder);	
 	return token;
 }
 
