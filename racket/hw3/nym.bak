@@ -1,0 +1,8 @@
+(define (isvalid stack amount)
+  
+  );end define
+
+
+;to make random number use (random k) where it will generate ints from 1 to k-1. 
+;the randomComp will use the (random k) function to pick both a stack to take from, and the amount to take
+(define randomComp)
