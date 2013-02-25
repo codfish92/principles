@@ -14,7 +14,6 @@ typedef enum {
 
 int yylex(void)
 {
-	static int derp = 0;
 	static int tokens = 0;
 	static int buffer = 0; // make the buffer 
 	static int linenumber = 1;
@@ -276,6 +275,7 @@ int yylex(void)
 			token = EOLCMT;
 			yytext = (char *) malloc((strlen(yystring)+1)*sizeof(char));
 			sprintf(yytext, yystring);
+			tokens++;
 	
 		}
 		else if('*' == buffer){ // a block comment
@@ -300,6 +300,7 @@ int yylex(void)
 						yytext = (char *) malloc((strlen(yystring)+1)*sizeof(char));
 						printf("yystring is /%s/\n");
 						sprintf(yytext, yystring);
+						tokens++;
 						break;
 					}
 					else{	//we are not at end of block comment, so just add buffer to token and continue
@@ -326,8 +327,6 @@ int yylex(void)
 	}
 	else
 	{
-		printf("%i whatever im bad\n", derp);
-		derp++;
 	   token = BAD;
 	   yytext = (char *) malloc(4*sizeof(char));
 	   if (isgraph(yychar)&&('#' != yychar))
@@ -336,8 +335,10 @@ int yylex(void)
 	      sprintf(yytext, "#%02X", (yychar&0xFF));
 	}
 	//----------------------------------------------------------
-	free(yystring);
-	free(holder);	
+	if(NULL !=yystring)
+		free(yystring);
+	if(NULL != holder)
+		free(holder);	
 	return token;
 }
 

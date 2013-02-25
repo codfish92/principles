@@ -1,0 +1,281 @@
+;worked with Maria Deslis
+(require racket/trace)
+(require racket/list)
+
+;the board used the the game
+(define board1 '((X) (X X X) (X X X X X) (X X X X X X X)))
+
+;This function will display the rows of the boards
+(define (readRow board)
+  (display  "\nRow 1: ")
+  (display (first board))
+  (display "\nRow 2: ")
+  (display (second board))
+  (display "\nRow 3: ")
+  (display (third board))
+  (display "\nRow 4: ")
+  (display (fourth board))
+  (display "\n")
+ );end define 
+
+;for choosing a row, validates after read
+(define (chooseRow board)
+  (display "Which row do you choose: ")
+  (validRow (read) board)
+  )
+
+;will call the next step if the row choice is valid, otherwise reprompt the user for a row
+(define (validRow choice board)
+  (if (or (negative? (- 4 choice)) (zero? choice) (negative? choice)); if 0 >= choice or choice > 4
+      (begin (display "\nThat is an invalid row\n") (chooseRow board)); reprompt user
+      (chooseSticks choice board);next step
+     )                                                        
+  );end define
+  
+;prompt user to pick the number of sticks to remove from row. validates after read
+(define (chooseSticks row board) 
+  (display "How many sticks do you want to remove: "); prompt
+  (validSticks (read) row board); validate
+  );end define
+
+;determines if the amount of sticks you want to remove from a row is valid
+(define (validSticks choice row board)
+  (if (or (zero? choice) (negative? choice)) ; if choice <= 0
+      (begin (display "You made an invalid stick choice") (chooseRow board)); reprompt them at the row level, incase they accidentaly picked an empty stack number
+  (cond ; for deciding which stack to refrence
+    [(equal? 1 row)
+     (if (negative? (- (length (first board)) choice)) ; if the choice given is more than the sticks in a stack
+         (begin (display "That is an invalid move") (chooseRow board)) ; go back to choose row in case they are stuck in an empty stack
+         (removeSticks row choice board) ;choice is valid, remove x amount of sticks from choosen row
+     )
+     ]
+    [(equal? 2 row); see above for comments
+      (if (negative? (- (length (second board)) choice))
+         (begin (display "That is an invalid move") (chooseRow board))
+         (removeSticks row choice board)
+     )
+     ]
+    [(equal? 3 row)
+      (if (negative? (- (length (third board)) choice))
+         (begin (display "That is an invalid move") (chooseRow board))
+         (removeSticks row choice board)
+     )
+      ]
+    [(equal? 4 row)
+      (if (negative? (- (length (fourth board)) choice))
+         (begin (display "That is an invalid move") (chooseRow board))
+         (removeSticks row choice board)
+     )
+     ]
+    [else (begin (display "thats herpderpy") (chooseRow board))] ; should not get here, since the row should already be validated
+    )
+  )
+  );end define
+;will remove sticks from chosen row. will decrement row count by one and cdr rest of list
+(define (removeSticks row choice board)
+  (if (equal? 1 row) ; if the row count is 1  
+      (cons (make-list (- (length (first board)) choice) 'X) (cdr board)); then make a list of the difference between the current length and the number you want to remove, and make a new board with that stack and the rest of the board
+      (cons (car board) (removeSticks (- row 1) choice (cdr board))); we are not on the row we want to remove sticks from, so recurse with row counter decrmented, while also leaving the previous stacks unaffected
+      )
+  );end define
+  
+
+
+;handels the actual playing, this is where the recursive call with a smaller game will occur
+(define (playGame board counter choice)
+  (cond 
+  [(equals? choice 1) ; if choice is 1, then it is a human vs human game
+  (readRow board); display board
+  (whoseTurn counter) ; display whose turn it is
+  (if (haswon board counter choice) ; if someone has won
+      (display "\nThankyou for playing"); exit
+      (playGame (chooseRow board) (+ 1 counter) choice); call playGame, where board will be whatever is removed after the prompt, and the turn counter is incremented
+  )
+  ]
+  [(equals? choice 2) ; if choice is 2, then it is a human vs random comp game
+   (if (equals? 0 (modulo counter 2)); if the player counter is even, it is human's turn
+       (begin
+       (readRow board) ;display board
+       (display "\nIts your turn"); show its your turn
+       (if (haswon board counter choice); if the computer has won
+          (display "\nThankyou for playing");exit 
+          (playGame (chooseRow board) (+ 1 counter) choice) ; recursie using same logic above
+          )
+       )
+       (begin ; its the computers turn
+         (if(haswon board counter choice); if the human has won
+            (display"\nThankyou for playing");exit
+         (playGame (makeRandomChoice board) (+ 1 counter) choice); recurse, using the function that generates random, valid choices for the computer
+         ) 
+       )
+       
+   )
+  ]
+  [(equals? choice 3); human vs. smart
+   (if (equals? 0 (modulo counter 2)); if the player counter is even, it is human's turn
+       (begin
+       (readRow board) ;display board
+       (display "\nIts your turn"); show its your turn
+       (if (haswon board counter choice); if the computer has won
+          (display "\nThankyou for playing");exit 
+          (playGame (chooseRow board) (+ 1 counter) choice) ; recursie using same logic above
+          )
+       )
+       (begin ; its the computers turn
+         (if(haswon board counter choice); if the human has won
+            (display"\nThankyou for playing");exit
+         (playGame (makeSmartChoice board) (+ 1 counter) choice); recurse, using the function that generates smart choice
+         ) 
+       )
+      )
+  ]
+  [else (display "Land the plane by the lake")]; should never get here, since choice validation is done before hand
+  )
+  
+  );end define
+
+;this is the starter function for everyting
+(define (nim board)
+  (define counter 0);used for determining whos turn it is
+  (playGame board counter (mainmenu)); call play game with stated board, player counter, and whatever mainmenu returns
+  );end define
+  
+;for determining who has won the game
+ (define (haswon board counter choice)
+   (cond [(equal? 1 choice); we are dealing with a human vs human player
+   (if (isEmpty board) ; if the board is a winning board
+       (if (equal? (modulo (+ 1 counter) 2) 0) ; determine which player
+           (display "\nPlayer 1 has won");output appopriate message
+           (display "\nPlayer 2 has won")
+       )
+       #f
+     )
+   ]
+   [(equal? 2 choice); human vs random
+   (if (isEmpty board)
+       (if (equal? (modulo (+ 1 counter) 2) 0)
+           (display "\nHuman has won")
+           (display "\nRandom has won")
+       )
+       #f
+       )
+     
+   ]
+   [(equal? 3 choice); human vs. smart
+    (if (isEmpty board)
+       (if (equal? (modulo (+ 1 counter) 2) 0)
+           (display "\nHuman has won")
+           (display "\nSmart has won")
+       )
+       #f
+     )
+    ]
+   )
+ );end define
+ 
+ ;used to determine if all stacks in the game are empty
+ (define (isEmpty board)
+   (if (empty? board); since cdr of a one element list is just an empty list
+       #t; must be a winning board
+       (if (empty? (car board)); board is normally a list containing lists, so a car must be used
+           (isEmpty (cdr board));recurse with rest of board
+           #f); it must not be a winning board
+       )
+   );end define 
+
+ 
+
+;displays proper players turn
+(define (whoseTurn counter)
+  (if (equal? (modulo counter 2) 0)
+      (display "\nPlayer 1's turn: ")
+      (display "\nPlayer 2's turn: ")
+      )
+  );end define
+
+;used to capture choice
+(define (mainmenu)
+  (display "\n1.Human vs. Human")
+  (display "\n2.Human vs. Random")
+  (display "\n3.Human vs. Smart")
+  (define choice (read)); capture choice as a read
+  (if (or (negative? (- 3 choice)) (zero? choice) (negative? choice)); if choice is <= 0 or >= 4
+          (begin (display "\nYou're an idiot you picked a mode that doesn't exist") (mainmenu)); output and reprompt
+          choice; return choice since its valid
+          )
+  );end define
+
+;for random computers, it is curretnly limited by a max amount of sticks of 7, 
+(define (makeRandomChoice board)
+  (define randomRow (+ (random 4) 1)) ; cant be outside of bounds of board 
+  (define randomSticks (+ (random 7) 1)); get a random number for sticks
+  (if (randomValid randomRow randomSticks board); determine if valid, uses a different validation function so random comp doesn't get asked for input, and so i wont need to pass whether its a human into validation function
+      (removeSticks randomRow randomSticks board); its a valid move, do it
+      (makeRandomChoice board); retry
+      )
+  
+  );end define
+
+;for validating the random players move, this way the comp wont be asked to provide input
+(define (randomValid row choice board)
+  (cond 
+    [(equal? 1 row)
+     (if (negative? (- (length (first board)) choice)); if the amount put in is over bounds of row
+         #f; its not valid
+         #t; random cant return anything lower than 0, and since we +1 it, it can't be 0 either, so all nums will be greater than 1, and we just checked if it was beyond bounds
+     )
+     ]
+    [(equal? 2 row); same logic as above
+      (if (negative? (- (length (second board)) choice))
+       #f
+       #t
+     )
+     ]
+    [(equal? 3 row)
+      (if (negative? (- (length (third board)) choice))
+          #f
+          #t
+     )
+      ]
+    [(equal? 4 row)
+      (if (negative? (- (length (fourth board)) choice))
+          #f
+          #t
+     )
+     ]
+    [else #f]
+    )
+  )
+
+
+;this function will make the computer make a smart choice.
+;this function is still under construction and is not finished
+;implementation is eluding me, i know it uses a bitwise parity where all 0's is a win state and a computer will always put the board in that state, but again implmentation eludes me
+(define (makeSmartChoice board)
+  (define rowSmart (smartRow board));get the row to remove from
+  (define sticksSmart (smartSticks rowSmart board));get the correct number of sticks 
+  (removeSticks rowSmart sticksSmart board); remove them
+  );end define
+
+(define (smartRow board)
+  (define parity (getParity board))
+  (if (equal? parity 0)
+      (+ 1 (random 4));it can't get it to be parity 0 if it is currently in 0, pick random row
+  (findSigRow board);rage quit. should look for row that affects the most significant bit of the parity, and pick this row
+  );end define
+
+(define (getParity board)
+  (bitwise-xor (length (first board)) (length (second board)) (length (third board)) (length (fourth board))); gets the parity of the board in base 10
+  );end define
+
+(define (smartSticks row board)
+  ;rage quit. should pick a number of sticks from picked row(should be the row that affects the most significant bit of the parity) and take the correct number of sticks from it to cause parity to be 0
+  );
+  
+(define (findSigRow board)
+  
+  )
+  
+;start game
+(nim board1) 
+
