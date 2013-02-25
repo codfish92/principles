@@ -1,0 +1,15 @@
+<program> -> main { <stmts> }
+<stmts> -> <stmt>;
+	-> <stmt>; <stmts>
+<stmt>	-> <var> = <expr>
+	-> while ( <expr> ) { <stmts> }
+	-> for ( <expr> ;  <expr>; <expr> ) { <stmts> }
+<expr>	-> <term> + <term>
+	-> <term> - <term>
+	-> <term>
+	-> <term> < <term>
+	-> <term> = <expr>
+<term>	-> <var> | const
+<var>	-> a | b | c | d
+
+

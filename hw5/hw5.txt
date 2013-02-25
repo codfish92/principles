@@ -1,0 +1,27 @@
+<program> -> main { <stmts> }
+<stmts> -> <stmt>;
+	-> <stmt>; <stmts>
+	-> <stmt>
+<stmt>	-> <var> = <expr>
+	-> while ( <expr> ) { <stmts> }
+	-> for ( <expr> ;  <expr>; <expr> ) { <stmts> }
+<expr>	-> <term> + <term>
+	-> <term> - <term>
+	-> <term>
+	-> <term> < <term>
+<term>	-> <var> | const
+<var>	-> a | b | c | d
+
+		main { <stmts> }
+		       /  | \		      
+		      /   |  \ _ _ _ _ _     			 
+	  	   <stmt> ;  	       <stmts>			
+		  /  | \              /   |   \
+	         /   |  \ 	     /    |    \ 
+	       <var> =  <expr>    <stmt>  ;   <stmts>
+		 |	  |	  / | \		  \__________________________
+		 a 	<term> <var>= <expr>				    |
+			  |      |       |			     ____ <stmt>
+			const    b     <term>			    / / / / | | \
+					 |
+				       <const>
