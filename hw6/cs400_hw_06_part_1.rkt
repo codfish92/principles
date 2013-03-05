@@ -388,21 +388,32 @@
 (define a 3)
 (define b 5)
 
-(define (jack a x y) 
+(define (jack x y) 
   (set! a (+ a b x))
   (+ a b x y)
   )
-(define (jill b x y)
+(define (jill x y)
   (set! b (- a b x))
   (+ a b x y)
   )
 
+(define (restore)
+  (set! a 3)
+  (set! b 5)
+ )
+
 (define (jj1 x y) 
   (display "jack-jill-jack-jill\n")
-  (display "jack: ") (display (jack a x y)) (display "\n")
-  (display "jill: ") (display (jill b x y)) (display "\n")
-  (display "jack: ") (display (jack a x y)) (display "\n")
-  (display "jill: ") (display (jill b x y)) (display "\n")
+  (display "jack: ") (display (jack x y)) (display "\n")
+  (display "jill: ") (display (jill x y)) (display "\n")
+  (display "jack: ") (display (jack x y)) (display "\n")
+  (display "jill: ") (display (jill x y)) (display "\n")
+  (restore)
+  (display "jack-jill-jill-jack\n")
+  (display "jack: ") (display (jack x y)) (display "\n")
+  (display "jill: ") (display (jill x y)) (display "\n")
+  (display "jill: ") (display (jill x y)) (display "\n")
+  (display "jack: ") (display (jack x y)) (display "\n")
   )
 (jj1 3 2)
 
@@ -410,18 +421,18 @@
 ; PART (b)
 ; Put your computations here. Be sure to make them comments so that the
 ; file you submit will run.
+;        3    5    3    2
+; CALL   a    b    c    d    returns
+; jack   11   5    3    2      21
+; jill   11   3    3    2      19 
+; jack   17   3    3    2      25
+; jill   17   11   3    2      33
 
 ; CALL   a    b    c    d    returns
-; jack
-; jill
-; jack
-; jill
-
-; CALL   a    b    c    d    returns
-; jack
-; jill
-; jill
-; jack
+; jack   11   5    3    2      21
+; jill   11   3    3    2      19
+; jill   11   5    3    2      25
+; jack   19   5    3    2      29
 
 ;**************************************************************************
 ;**************************************************************************
@@ -476,33 +487,67 @@
 ; necessariy the same 'a' and 'b' in the 'fnlst'. They are just example
 ; identifiers. You can use them (or not).
 
-(define a 1)
-(define b 1)
-(define (jack w) 17)
-(define (jill x) 13)
-(define (adam y) 42)
-(define (abby z) 39)
+(define a 3)
+(define b 5)
+(define aa 3)
+(define bb 5)
+(define x 7)
+(define y 2)
+(define (jack) 
+  (set! a (+ a b x))
+  (+ a b x y)
+  )
 
-         
+(define (jill)
+  (set! b (- a b x))
+  (+ a b x y)
+  )
+(define (adam)
+  (set! aa (+ aa bb x))
+  (+ aa bb x y)
+  )
+(define (abby)
+  (set! bb (- aa bb x))
+  (+ aa bb x y)
+  )
+
+(define (jjaa1)
+  (display "Using my code") (display "\n")
+  (display "adam: ") (display (adam)) (display "\n")
+        (display "abby: ") (display (abby)) (display "\n")
+        (display "adam: ") (display (adam)) (display "\n")
+        (display "abby: ") (display (abby)) (display "\n")
+        (display "jack: ") (display (jack)) (display "\n")
+        (display "jill: ") (display (jill)) (display "\n")
+        (display "adam: ") (display (adam)) (display "\n")
+        (display "abby: ") (display (abby)) (display "\n")
+        (display "jack: ") (display (jack)) (display "\n")
+        (display "jill: ") (display (jill)) (display "\n")
+        (display "adam: ") (display (adam)) (display "\n")
+        (display "abby: ") (display (abby)) (display "\n")
+        (display "jack: ") (display (jack)) (display "\n")
+        (display "jill: ") (display (jill)) (display "\n")
+  )
+(jjaa1)
 ; PART (b)
 ; Put your computations here. Be sure to make them comments so that the
 ; file you submit will run.
-
+;        3    5    7    2
 ; CALL   a    b    c    d    returns
-; adam
-; abby
-; adam
-; abby
-; jack
-; jill
-; adam
-; abby
-; jack
-; jill
-; adam
-; abby
-; jack
-; jill
+; adam   15   5    7    2       29
+; abby   15   3    7    2       27
+; adam   25   3    7    2       37
+; abby   25   15   7    2       49
+; jack   15   5    7    2       29 
+; jill   15   3    7    2       27
+; adam   47   15   7    2       71
+; abby   47   25   7    2       81
+; jack   25   3    7    2       37
+; jill   25   15   7    2       49
+; adam   79   25   7    2       113
+; abby   79   47   7    2       135
+; jack   47   15   7    2       71
+; jill   47   25   7    2       81
 
 ;**************************************************************************
 ;**************************************************************************

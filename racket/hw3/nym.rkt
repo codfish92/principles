@@ -24,6 +24,16 @@
       )
   );end define
 
+(define (hasWon board)
+  (if (empty? board)
+      #t
+      (if (zero? (caar board))
+          (hasWon (cdr board))
+          #f
+          )
+      );end if
+  
+  );end define
 
 
 
@@ -67,5 +77,6 @@
 
 
 (define testBoard '[(3) (5) (7) (2)]) ; for testing
+(define winBoard '[(0) (0) (0) (0)]) ;for testing
 (define players '(0 1));0 is human 1 is random 2 is smart
 ;(trace printBoardStep)
