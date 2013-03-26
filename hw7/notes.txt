@@ -1,0 +1,13 @@
+If you were to shift the regonition of a complex number in the form of "real" "+|-" "imaginary" to the compiler
+rather than the lexer, you would hit an issue of having to constently look ahead. The parser will more than likely
+find a real number than a imaginary number. But every time it sees a real number,
+1.register token as real
+2.look ahead to see if the next token is an operator, specifically a + or - operator
+3.look ahead of the operator to see if it has an imaginary number
+It would perform these steps every time it encounters a real number. This is a big waste of time. One simple way to
+make this easier on the parser is to change the syntax of the imaginary number to require the "i" first. This allows
+the compiler too know exactly when it encounters a complex number. ie i3.4-6 ==-6+3.4i, the amount of times it needs to
+look ahead is siginificantly less, and with much less options for an imaginary number, it doesn't have to go down nearly
+as many paths on the parse tree.
+now syntax is "imaginary" (+|- "real")? 
+ 
