@@ -1,0 +1,116 @@
+studyguide 
+closure: when functions can see the variables within their scope and all scopes above them. The jack and jill example is a good look at this
+Lexeme: a symbol or string of valid characters, ie 2 - 1; the lexemes are 2, -, 1, and ;
+Syntactical analysis: funny way of saying parser, checks a sequence of tokens and determines if they are valid syntax.
+First class function: a function that can accept a function as input and returns that function as a value.
+Currying: The act of making a function have access to variables it hasen't defined. it is the act of making a function that takes multiple arguments as chain of functions that only take one argument. 
+Right-most derivation: when you try to reduce a the rightmost non terminal first: ie 1 + 2
+1-> expr + expr
+2-> expr + 2
+3-> 1 + 2
+Token: the classification of a lexeme. ie 2 - 1;, the lexemes are 2, -, 1 and ;, but the tokens are <int> <operator> <int> ;. The token is not the symbol itself, but general classification of the symbol. 
+Sentence: a string of tokens that make gramatical sense in a given grammer. 
+Parser: deterimines if a string of tokens is valid, see syntatical anaylsis. 
+Lexer: is given a series of characters from an alphabet and determines what type of tokens they are. They do not perform any grammer checks, ie 1++++++ is a valid string of lexemes, but doesn't make any sense in the parser. 
+Finite automaton: A statement declaring that there are only a set number of states that you can be in. Regular expression are a good example of this. Other terms for this are finite state machine, state machine.
+Regular grammar: A grammer that expresses a formal language, or a language that can be expressed using regular expressions. most regular grammars have the form
+S-> A | B | C
+A-> a | xS
+...
+
+A non regular grammar would be 
+S -> x | aSa 
+this is because there is no way to have a regualr expression match a string surrounded by an equal number of a's. The only way you could is to have a regex for every possiblity, which is impossible since there are an infinite number of possiblities (ie a non finiite state machine or infinte state machine)
+Contex free grammar: Any grammer that has the general form
+A -> B | cC | DD
+B -> DD | b
+...
+All regular grammars are contex free, but not all contex free grammars are regular grammars
+Pushdown automaton: The way all parsers work, it employs the use of a stack to translate a string of tokens
+5+5+10=x; would work like such
+(aaa, ab ect are just identifiers for parsing cuz i dont want to make the entire tree)
+<stmt> ;
+a<expr> = b<expr>
+a
+aa<expr> + ab<expr> 
+aa
+aaa<expr> + aab<expr>
+aaa
+5
+aab
+5
+ab
+10
+b
+x
+
+They essentially recurse into each non terminal.
+Production rule: The possible derivations of a symbol, ie <expr> -> <expr> | <expr> + <expr>
+High order function: A function that takes a function as input and/or returns a function on output. A derivate is a good example of high order function. ie derivate of x^2 is 2x, in this case x^2 is a function passed as the input and the output is 2x, which is a function
+Lexical scope: A funny way of saying the scope of a function or variable. It is the string of all visible variables at that point. 
+//scope is (a)
+ie func foo(a);
+	//scope is (a)
+	int b;
+	//scope is (a, b)
+	func bar();
+		int c;
+		//scope is (a, b, c)
+	end bar
+	//scope is (a, b)
+	int d;
+	//scope is (a, b, d)
+	
+end foo
+//scope is (a)
+Regular expression: a finite state machine that returns matched lexemes given rules. ie the regex [0-9]+\.[0-9]+ will match one or more number of digits, followed immediatly by a ., followed immeditetally by one or more digits. the formal definition is grammer for a formal language.
+Pairwise-disjoint: this is when you split up all the terminal a production rule will eventually create. if any symbol has duplicate terminals, it is not pairwise disjoint otherwise it is. 
+(upper case is non terminal, lower case is terminal)
+ie S -> A | B | C | a
+A-> a | f
+B-> b
+C-> c | d | e
+S's set is 
+{a, f}, {b}, {c, d, e}, {a}
+because a appears in two sets, this is not pairwise disjoint 
+while 
+ie S -> AbC | deF
+A-> S | Bbg
+B-> t | s | r
+C-> S | f
+F-> S | de
+S's set is 
+{t, s, r}, {d}
+this means S is pairwise disjoint. 
+Alphabet: A set of characters that are valid in a language. ie A is a valid letter in english, but the chinese symbol for dog is not. 
+Lexical analysis: The process of turning a string of characters into tokens, ie what a lexer does. 
+Referential transparency: the concept of providing a function an input multiple times and getting the exact same output. This applies to variables as well
+ie func foo(x)
+	x++
+	return x
+is not referential transperent because if x = 2 and you call foo(x), the output is 3, but if you call foo(x) right after it, you get 4. 
+func bar(x)
+	temp = x + 1
+	return temp
+is referential transperent because if x = 2, and you call bar(x) any number of times, it will always return 3, given you havent changed x somewhere else. 
+Semantics: The style or convention of something. for instance nothing prevents you from doing this in c
+int derp(int x)
+					{
+	return x++;}
+but the general symantics of coding would state you dont do this.
+Grammatical ambiguity: when a symbol could reduce down to two or more forms. ie i saw her duck, is an ambiguous phrase becuase duck can be either a noun or the verb. The only way to tell which one it is is to go down a path until you get an answer that makes sense. you would start by assuming duck is a noun, and then try to interperet or parse the sentence. this would not make sense(syntax error) so you change it to a verb. now the sentance makes sense. 
+Leftmost derivation: Like right most derivation, execept you reduce the left most non terminal first
+ie 1-> <expr> - <expr>
+2-><expr> + <expr> - <expr>
+3-> 10 + <expr> - <expr>
+4-> 10 + 5 - <expr>
+5-> 10 + 5 - 7 
+this is a left most derivation. 
+Dynamic Scope: A variables value is determined by the first value with the same identifier poped off the stack. ie 
+x = 10;
+func foo();
+	int x = 4;
+	print x;
+this would print 4.
+
+
