@@ -114,3 +114,26 @@ func foo();
 this would print 4.
 
 
+questions
+1. A struct allocates space for all of its members, while a union only allocates space for the largest size one. This saves space and ensures that you process values one at a time. It uses a union because it may need to be a float, int, char *, or some other type.
+2. yytext is a buffer, meaning refering to it at a different time may yield a very different result. 
+3. This is usually because your grammer is ambigious in some way. A shift/reduce conflict means there is a moment where it could shift a statment over, or reduce the statment further
+ie if <stmt> then <stmt>
+if<stmt> then <stmt> else <stmt>
+bision will default to the shift, but can be told which to do by %expect
+reduce reduce is when there are two reduction possiblites. 
+ie sequence: empty | sequence words | sequence redirects
+words: empty| words word| word
+redirects: empty | redirect | redirects redirect
+empty can be reduced many possible ways. 
+shift/shift would be two possible expression shifts
+
+4. Name: the name of the var. also called lvalue
+address: the memory location it is stored
+value: the contents of the memory location
+type: how the data is viewed, chars and ints are interpreted very differently
+lifetime: how long the variable exists. local vars in functions exist only during the function call
+scope: where a variable is visible. A variable may still be 'alive' but certain classes or function cant access because it is beyond their scope. 
+
+5. 
+
